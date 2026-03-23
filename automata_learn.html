@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automata Lab — DFA & NFA Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c14;
+  --surface: #0e1520;
+  --card: #121a28;
+  --border: #1e2d42;
+  --accent: #00e5ff;
+  --green: #00ff88;
+  --red: #ff4466;
+  --yellow: #ffd600;
+  --purple: #b388ff;
+  --text: #e8f0fe;
+  --muted: #546e8a;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* Header */
+header {
+  text-align: center;
+  padding: 32px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+header .label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+}
+header p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-family: var(--mono);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px;
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active {
+  background: var(--card);
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* Mode selector */
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.mode-btn {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.mode-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mode-btn.active { border-color: var(--accent); background: rgba(0,229,255,0.07); color: var(--accent); }
+.mode-btn .tag {
+  display: block;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* Preset picker */
+.preset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.preset {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.preset:hover, .preset.active { border-color: var(--yellow); color: var(--yellow); background: rgba(255,214,0,0.06); }
+
+/* Input row */
+.input-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.input-row input {
+  flex: 1;
+  min-width: 140px;
+  padding: 11px 16px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-row input:focus { border-color: var(--accent); }
+.run-btn {
+  padding: 11px 24px;
+  border-radius: 9px;
+  border: none;
+  background: var(--accent);
+  color: #080c14;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.run-btn:hover { opacity: 0.85; }
+
+/* SVG diagram */
+.diagram-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 10px;
+  margin-bottom: 18px;
+}
+#mainSvg { display: block; margin: 0 auto; }
+
+/* Transition table */
+.ttable { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 0.85rem; }
+.ttable th {
+  background: var(--surface);
+  padding: 9px 14px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.ttable td {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  text-align: center;
+  color: var(--text);
+}
+.ttable tr.hl td { background: rgba(0,229,255,0.06); color: var(--accent); }
+
+/* Steps */
+.step-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 60px 1fr;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  align-items: center;
+  transition: background 0.2s;
+}
+.step-row.last { background: rgba(0,255,136,0.04); }
+.step-row .sym { color: var(--yellow); font-weight: 700; text-align: center; }
+.step-row .st { color: var(--accent); }
+.step-row .arrow { color: var(--muted); text-align: center; }
+.steps-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 60px 1fr;
+  gap: 2px;
+  padding: 6px 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* Verdict */
+.verdict {
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-align: center;
+  font-family: var(--mono);
+  margin-top: 14px;
+  border: 1px solid;
+}
+.verdict.accept { background: rgba(0,255,136,0.08); color: var(--green); border-color: var(--green); }
+.verdict.reject { background: rgba(255,68,102,0.08); color: var(--red); border-color: var(--red); }
+
+/* Explanation box */
+.explain {
+  background: var(--surface);
+  border-left: 3px solid var(--purple);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 16px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #a0b4cc;
+  margin-top: 14px;
+}
+.explain strong { color: var(--text); }
+.explain .bullet { display: block; margin: 4px 0; padding-left: 14px; position: relative; }
+.explain .bullet::before { content: '›'; position: absolute; left: 0; color: var(--purple); }
+
+/* Info panel */
+.info-box {
+  background: rgba(179,136,255,0.06);
+  border: 1px solid rgba(179,136,255,0.2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  color: #a0b4cc;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.info-box strong { color: var(--purple); }
+
+/* NFA convert section */
+.convert-steps { margin-top: 12px; }
+.convert-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.convert-num {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #080c14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.convert-text { color: #a0b4cc; line-height: 1.6; }
+.convert-text strong { color: var(--text); }
+
+/* hidden */
+.hidden { display: none; }
+
+/* legend */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 10px; font-size: 0.78rem;
+  font-family: var(--mono); color: var(--muted);
+}
+.legend span { display: flex; align-items: center; gap: 6px; }
+.ldot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+/* section panel */
+.panel { display: none; }
+.panel.show { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="label">Theory of Computation</div>
+  <h1>Automata Lab</h1>
+  <p>DFA & NFA Explorer — learn, trace, convert</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('dfa')">DFA Tracer</button>
+  <button class="tab" onclick="showTab('nfa')">NFA Tracer</button>
+  <button class="tab" onclick="showTab('convert')">NFA → DFA</button>
+  <button class="tab" onclick="showTab('theory')">Theory</button>
+</div>
+
+<!-- ===== DFA TAB ===== -->
+<div class="panel show" id="tab-dfa">
+
+  <div class="card">
+    <div class="card-title">Choose a DFA</div>
+    <div class="preset-list" id="dfaPresets"></div>
+    <div class="info-box" id="dfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="dfaInput" placeholder="Enter string e.g. bba" onkeydown="if(event.key==='Enter')runDFA()"/>
+      <button class="run-btn" onclick="runDFA()">Trace ▶</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">State Diagram</div>
+    <div class="diagram-wrap">
+      <svg id="dfaSvg" viewBox="0 0 600 220" width="100%" height="220"></svg>
+    </div>
+    <div class="legend" id="dfaLegend"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Transition Table</div>
+    <div id="dfaTable"></div>
+  </div>
+
+  <div class="card hidden" id="dfaResultCard">
+    <div class="card-title">Trace Result</div>
+    <div class="steps-header">
+      <div>#</div><div>Current State</div><div>Read</div><div>Next State</div>
+    </div>
+    <div id="dfaSteps"></div>
+    <div id="dfaVerdict"></div>
+    <div id="dfaExplain" class="explain"></div>
+  </div>
+</div>
+
+<!-- ===== NFA TAB ===== -->
+<div class="panel" id="tab-nfa">
+
+  <div class="card">
+    <div class="card-title">Choose an NFA</div>
+    <div class="preset-list" id="nfaPresets"></div>
+    <div class="info-box" id="nfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
+      <button class="run-btn" onclick="runNFA()">Trace ▶</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">State Diagram</div>
+    <div class="diagram-wrap">
+      <svg id="nfaSvg" viewBox="0 0 600 220" width="100%" height="220"></svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Transition Table</div>
+    <div id="nfaTable"></div>
+  </div>
+
+  <div class="card hidden" id="nfaResultCard">
+    <div class="card-title">NFA Trace — All Active States</div>
+    <div id="nfaSteps"></div>
+    <div id="nfaVerdict"></div>
+    <div id="nfaExplain" class="explain"></div>
+  </div>
+</div>
+
+<!-- ===== CONVERT TAB ===== -->
+<div class="panel" id="tab-convert">
+
+  <div class="card">
+    <div class="card-title">NFA → DFA Conversion</div>
+    <div class="preset-list" id="convPresets"></div>
+    <div class="info-box" id="convDesc"></div>
+    <button class="run-btn" style="margin-top:4px" onclick="runConvert()">Convert ▶</button>
+  </div>
+
+  <div class="card hidden" id="convResultCard">
+    <div class="card-title">Step-by-Step Conversion</div>
+    <div id="convSteps"></div>
+    <div class="card-title" style="margin-top:20px">Resulting DFA Transition Table</div>
+    <div id="convTable"></div>
+    <div class="card-title" style="margin-top:20px">DFA Diagram</div>
+    <div class="diagram-wrap">
+      <svg id="convSvg" viewBox="0 0 700 260" width="100%" height="260"></svg>
+    </div>
+    <div id="convExplain" class="explain" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<!-- ===== THEORY TAB ===== -->
+<div class="panel" id="tab-theory">
+  <div class="card">
+    <div class="card-title">What is a Finite Automaton?</div>
+    <div class="explain" style="border-left-color:var(--accent)">
+      A Finite Automaton is an <strong>abstract machine</strong> that reads a string one symbol at a time and decides to <strong style="color:var(--green)">ACCEPT</strong> or <strong style="color:var(--red)">REJECT</strong> it.<br><br>
+      Think of it like a <strong>security gate</strong> — you enter a code symbol by symbol, and at the end it either lets you in or not.
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Formal Definition — 5 Tuple</div>
+    <div class="explain" style="border-left-color:var(--yellow)">
+      <strong>M = (Q, Σ, q₀, F, δ)</strong><br><br>
+      <span class="bullet"><strong>Q</strong> — Finite set of all states (all the "rooms")</span>
+      <span class="bullet"><strong>Σ (Sigma)</strong> — Alphabet — the symbols the machine can read</span>
+      <span class="bullet"><strong>q₀</strong> — Start state — where the machine always begins</span>
+      <span class="bullet"><strong>F</strong> — Set of Final/Accept states — double circle in diagrams</span>
+      <span class="bullet"><strong>δ (delta)</strong> — Transition function — the movement rules</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">DFA vs NFA</div>
+    <table class="ttable">
+      <thead><tr><th>Feature</th><th>DFA</th><th>NFA</th></tr></thead>
+      <tbody>
+        <tr><td>Next states</td><td>Exactly ONE</td><td>Multiple possible</td></tr>
+        <tr><td>ε transitions</td><td>❌ Not allowed</td><td>✅ Allowed</td></tr>
+        <tr><td>Dead state</td><td>Required</td><td>Not required</td></tr>
+        <tr><td>Randomness</td><td>None</td><td>Chooses best path</td></tr>
+        <tr><td>Power</td><td colspan="2" style="color:var(--yellow)">Equal — every NFA has an equivalent DFA</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">How to Read a State Diagram</div>
+    <div class="explain" style="border-left-color:var(--green)">
+      <span class="bullet"><strong>→ Arrow into a state</strong> = that is the start state</span>
+      <span class="bullet"><strong>Single circle ○</strong> = regular (non-final) state</span>
+      <span class="bullet"><strong>Double circle ◎</strong> = final / accept state</span>
+      <span class="bullet"><strong>Arrow between states</strong> = transition labeled with input symbol</span>
+      <span class="bullet"><strong>Self-loop arrow</strong> = stay in the same state</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Regular Language Operations</div>
+    <div class="explain" style="border-left-color:var(--purple)">
+      <span class="bullet"><strong>Union A∪B</strong> — strings in A <em>or</em> B</span>
+      <span class="bullet"><strong>Concatenation A∘B</strong> — a string from A followed by a string from B</span>
+      <span class="bullet"><strong>Star A*</strong> — zero or more repetitions of strings in A</span>
+      <span class="bullet"><strong>Closure</strong> — Regular languages are closed under all 3 operations</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DFA_PRESETS = [
+  {
+    id:'ends_a', label:'Ends with a', alphabet:['a','b'],
+    desc:'Accepts all strings over {a,b} that <strong>end with the symbol a</strong>. Examples: a, ba, bba, aba ✅ | b, ab, bb ❌',
+    states:['q0','q1'], start:'q0', finals:['q1'],
+    delta:{ q0:{a:'q1',b:'q0'}, q1:{a:'q1',b:'q0'} },
+    layout:{ q0:[130,110], q1:[420,110] },
+    edges:[
+      {from:'q0',to:'q1',sym:'a',curve:0},
+      {from:'q1',to:'q0',sym:'b',curve:-50},
+      {from:'q0',to:'q0',sym:'b',self:true},
+      {from:'q1',to:'q1',sym:'a',self:true},
+    ]
+  },
+  {
+    id:'ends_b', label:'Ends with b', alphabet:['a','b'],
+    desc:'Accepts all strings over {a,b} that <strong>end with the symbol b</strong>. Examples: b, ab, aab, bab ✅ | a, ba, aa ❌',
+    states:['q0','q1'], start:'q0', finals:['q1'],
+    delta:{ q0:{a:'q0',b:'q1'}, q1:{a:'q0',b:'q1'} },
+    layout:{ q0:[130,110], q1:[420,110] },
+    edges:[
+      {from:'q0',to:'q1',sym:'b',curve:0},
+      {from:'q1',to:'q0',sym:'a',curve:-50},
+      {from:'q0',to:'q0',sym:'a',self:true},
+      {from:'q1',to:'q1',sym:'b',self:true},
+    ]
+  },
+  {
+    id:'even_a', label:'Even number of a\'s', alphabet:['a','b'],
+    desc:'Accepts strings over {a,b} with an <strong>even number of a\'s</strong> (0 counts as even). Examples: ε, b, bb, aa, bab ✅ | a, aba, aab ❌',
+    states:['q0','q1'], start:'q0', finals:['q0'],
+    delta:{ q0:{a:'q1',b:'q0'}, q1:{a:'q0',b:'q1'} },
+    layout:{ q0:[130,110], q1:[420,110] },
+    edges:[
+      {from:'q0',to:'q1',sym:'a',curve:0},
+      {from:'q1',to:'q0',sym:'a',curve:-50},
+      {from:'q0',to:'q0',sym:'b',self:true},
+      {from:'q1',to:'q1',sym:'b',self:true},
+    ]
+  },
+  {
+    id:'starts_0', label:'Starts with 0', alphabet:['0','1'],
+    desc:'Accepts all strings over {0,1} that <strong>start with 0</strong>. Examples: 0, 00, 01, 010 ✅ | 1, 10, 11 ❌',
+    states:['q0','q1','qd'], start:'q0', finals:['q1'],
+    delta:{ q0:{'0':'q1','1':'qd'}, q1:{'0':'q1','1':'q1'}, qd:{'0':'qd','1':'qd'} },
+    layout:{ q0:[100,110], q1:[320,110], qd:[320,190] },
+    edges:[
+      {from:'q0',to:'q1',sym:'0',curve:0},
+      {from:'q0',to:'qd',sym:'1',curve:0},
+      {from:'q1',to:'q1',sym:'0,1',self:true},
+      {from:'qd',to:'qd',sym:'0,1',self:true},
+    ]
+  },
+  {
+    id:'contains_a', label:'Contains a', alphabet:['a','b'],
+    desc:'Accepts all strings over {a,b} that <strong>contain at least one a</strong>. Examples: a, ba, bab, ab ✅ | b, bb, ε ❌',
+    states:['q0','q1'], start:'q0', finals:['q1'],
+    delta:{ q0:{a:'q1',b:'q0'}, q1:{a:'q1',b:'q1'} },
+    layout:{ q0:[130,110], q1:[420,110] },
+    edges:[
+      {from:'q0',to:'q1',sym:'a',curve:0},
+      {from:'q0',to:'q0',sym:'b',self:true},
+      {from:'q1',to:'q1',sym:'a,b',self:true},
+    ]
+  },
+];
+
+const NFA_PRESETS = [
+  {
+    id:'nfa_ends0', label:'Ends with 0', alphabet:['0','1'],
+    desc:'NFA that accepts all strings over {0,1} that <strong>end with 0</strong>. An NFA can "guess" when it\'s reading the last symbol.',
+    states:['A','B'], start:'A', finals:['B'],
+    delta:{ A:{'0':['A','B'],'1':['A']}, B:{'0':[],'1':[]} },
+    layout:{ A:[150,110], B:[420,110] },
+    edges:[
+      {from:'A',to:'B',sym:'0',curve:0},
+      {from:'A',to:'A',sym:'0,1',self:true},
+    ]
+  },
+  {
+    id:'nfa_ends1', label:'Ends with 1', alphabet:['0','1'],
+    desc:'NFA that accepts all strings over {0,1} that <strong>end with 1</strong>.',
+    states:['A','B'], start:'A', finals:['B'],
+    delta:{ A:{'0':['A'],'1':['A','B']}, B:{'0':[],'1':[]} },
+    layout:{ A:[150,110], B:[420,110] },
+    edges:[
+      {from:'A',to:'B',sym:'1',curve:0},
+      {from:'A',to:'A',sym:'0,1',self:true},
+    ]
+  },
+  {
+    id:'nfa_len2', label:'Length exactly 2', alphabet:['0','1'],
+    desc:'NFA that accepts all strings over {0,1} of <strong>length exactly 2</strong>. Examples: 00, 01, 10, 11 ✅',
+    states:['A','B','C'], start:'A', finals:['C'],
+    delta:{ A:{'0':['B'],'1':['B']}, B:{'0':['C'],'1':['C']}, C:{'0':[],'1':[]} },
+    layout:{ A:[120,110], B:[310,110], C:[500,110] },
+    edges:[
+      {from:'A',to:'B',sym:'0,1',curve:0},
+      {from:'B',to:'C',sym:'0,1',curve:0},
+    ]
+  },
+];
+
+const CONV_PRESETS = [
+  {
+    id:'conv1', label:'Ends with 0', alphabet:['0','1'],
+    desc:'Convert the NFA for strings ending with 0 into an equivalent DFA. Watch how NFA state-sets become single DFA states.',
+    states:['A','B'], start:'A', finals:['B'],
+    nfaDelta:{ A:{'0':['A','B'],'1':['A']}, B:{'0':[],'1':[]} },
+  },
+  {
+    id:'conv2', label:'Ends with 1', alphabet:['0','1'],
+    desc:'Convert the NFA for strings ending with 1 into an equivalent DFA.',
+    states:['A','B'], start:'A', finals:['B'],
+    nfaDelta:{ A:{'0':['A'],'1':['A','B']}, B:{'0':[],'1':[]} },
+  },
+  {
+    id:'conv3', label:'Custom NFA (a,b)', alphabet:['a','b'],
+    desc:'NFA over {a,b} with states {A,B,C}, start A, final C. Converts to DFA using subset construction.',
+    states:['A','B','C'], start:'A', finals:['C'],
+    nfaDelta:{ A:{a:['A','B'],b:['A']}, B:{a:[],b:['C']}, C:{a:[],b:[]} },
+  },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let curDFA = DFA_PRESETS[0];
+let curNFA = NFA_PRESETS[0];
+let curConv = CONV_PRESETS[0];
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => {
+  buildPresets('dfaPresets', DFA_PRESETS, (p)=>{ curDFA=p; selectDFA(); }, 0);
+  buildPresets('nfaPresets', NFA_PRESETS, (p)=>{ curNFA=p; selectNFA(); }, 0);
+  buildPresets('convPresets', CONV_PRESETS, (p)=>{ curConv=p; selectConv(); }, 0);
+  selectDFA(); selectNFA(); selectConv();
+};
+
+function buildPresets(containerId, presets, onSelect, defaultIdx) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  presets.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset' + (i===defaultIdx?' active':'');
+    btn.textContent = p.label;
+    btn.onclick = () => {
+      el.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      onSelect(p);
+    };
+    el.appendChild(btn);
+  });
+}
+
+function selectDFA() {
+  document.getElementById('dfaDesc').innerHTML = curDFA.desc;
+  document.getElementById('dfaInput').value = '';
+  document.getElementById('dfaResultCard').classList.add('hidden');
+  drawDFADiagram('dfaSvg', curDFA, []);
+  buildTransTable('dfaTable', curDFA.states, curDFA.alphabet, curDFA.delta, curDFA.start, curDFA.finals, false);
+  buildLegend('dfaLegend', curDFA.start, curDFA.finals);
+}
+
+function selectNFA() {
+  document.getElementById('nfaDesc').innerHTML = curNFA.desc;
+  document.getElementById('nfaInput').value = '';
+  document.getElementById('nfaResultCard').classList.add('hidden');
+  drawNFADiagram('nfaSvg', curNFA, []);
+  buildNFATransTable('nfaTable', curNFA);
+}
+
+function selectConv() {
+  document.getElementById('convDesc').innerHTML = curConv.desc;
+  document.getElementById('convResultCard').classList.add('hidden');
+}
+
+// ============================================================
+// DFA RUN
+// ============================================================
+function runDFA() {
+  const raw = document.getElementById('dfaInput').value.trim();
+  if (!raw && raw !== '') { return; }
+  const str = raw;
+
+  // validate
+  if (str.length > 0) {
+    for (const c of str) {
+      if (!curDFA.alphabet.includes(c)) {
+        alert(`Invalid symbol "${c}". Alphabet is {${curDFA.alphabet.join(',')}}`);
+        return;
+      }
+    }
+  }
+
+  let state = curDFA.start;
+  const steps = [];
+  const chars = str === '' ? [] : [...str];
+
+  for (const sym of chars) {
+    const next = curDFA.delta[state][sym];
+    steps.push({ from: state, sym, to: next });
+    state = next;
+  }
+
+  const accepted = curDFA.finals.includes(state);
+  const activeStates = steps.map(s=>s.from).concat([state]);
+
+  drawDFADiagram('dfaSvg', curDFA, activeStates);
+
+  // Steps HTML
+  let sHTML = '';
+  steps.forEach((s, i) => {
+    const isLast = i === steps.length-1;
+    sHTML += `<div class="step-row ${isLast?'last':''}">
+      <div style="color:var(--muted);font-family:var(--mono)">${i+1}</div>
+      <div class="st">${s.from}</div>
+      <div class="sym">${s.sym}</div>
+      <div class="st">${s.to}</div>
+    </div>`;
+  });
+  if (steps.length === 0) sHTML = `<div style="color:var(--muted);font-family:var(--mono);padding:10px 0">Empty string ε — no symbols read</div>`;
+
+  // Explanation
+  const explainLines = buildDFAExplanation(str, steps, state, accepted, curDFA);
+
+  document.getElementById('dfaSteps').innerHTML = sHTML;
+  document.getElementById('dfaVerdict').innerHTML = `<div class="verdict ${accepted?'accept':'reject'}">
+    ${accepted ? '✅ ACCEPTED' : '❌ REJECTED'} — ended in state <strong>${state}</strong>${accepted?' which is a final state':' which is NOT a final state'}
+  </div>`;
+  document.getElementById('dfaExplain').innerHTML = explainLines;
+  document.getElementById('dfaResultCard').classList.remove('hidden');
+}
+
+function buildDFAExplanation(str, steps, finalState, accepted, dfa) {
+  let html = '<strong>📖 Plain English Explanation</strong><br><br>';
+  if (str === '') {
+    html += `<span class="bullet">You entered the <strong>empty string ε</strong> — no symbols were read.</span>`;
+    html += `<span class="bullet">The machine stays at the start state <strong>${dfa.start}</strong>.</span>`;
+    html += `<span class="bullet">${accepted ? `<strong>${dfa.start}</strong> is a final state — so ε is <strong style="color:var(--green)">ACCEPTED</strong>.` : `<strong>${dfa.start}</strong> is not a final state — so ε is <strong style="color:var(--red)">REJECTED</strong>.`}</span>`;
+    return html;
+  }
+  html += `<span class="bullet">We start at state <strong>${dfa.start}</strong> and read the string "<strong>${str}</strong>" one symbol at a time.</span>`;
+  steps.forEach((s, i) => {
+    html += `<span class="bullet">Step ${i+1}: In state <strong>${s.from}</strong>, we read <strong style="color:var(--yellow)">${s.sym}</strong> → move to <strong>${s.to}</strong></span>`;
+  });
+  html += `<span class="bullet">After reading all symbols, we are in state <strong>${finalState}</strong>.</span>`;
+  if (accepted) {
+    html += `<span class="bullet" style="color:var(--green)"><strong>${finalState}</strong> is a final state (double circle) → string is <strong>ACCEPTED ✅</strong></span>`;
+  } else {
+    html += `<span class="bullet" style="color:var(--red)"><strong>${finalState}</strong> is NOT a final state → string is <strong>REJECTED ❌</strong></span>`;
+  }
+  return html;
+}
+
+// ============================================================
+// NFA RUN
+// ============================================================
+function runNFA() {
+  const raw = document.getElementById('nfaInput').value.trim();
+  const str = raw;
+
+  if (str.length > 0) {
+    for (const c of str) {
+      if (!curNFA.alphabet.includes(c)) {
+        alert(`Invalid symbol "${c}". Alphabet is {${curNFA.alphabet.join(',')}}`);
+        return;
+      }
+    }
+  }
+
+  // Subset simulation
+  let currentStates = new Set([curNFA.start]);
+  const stepLog = [];
+
+  for (const sym of str) {
+    const nextStates = new Set();
+    for (const s of currentStates) {
+      const targets = curNFA.delta[s][sym] || [];
+      targets.forEach(t => nextStates.add(t));
+    }
+    stepLog.push({ sym, from: new Set(currentStates), to: new Set(nextStates) });
+    currentStates = nextStates;
+  }
+
+  const accepted = [...currentStates].some(s => curNFA.finals.includes(s));
+
+  let sHTML = `<div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-bottom:10px">NFA tracks ALL possible active states simultaneously</div>`;
+  stepLog.forEach((s, i) => {
+    sHTML += `<div class="step-row">
+      <div style="color:var(--muted);font-family:var(--mono)">${i+1}</div>
+      <div class="st">{${[...s.from].join(',')}}</div>
+      <div class="sym">${s.sym}</div>
+      <div class="st">{${[...s.to].join(',') || '∅'}}</div>
+    </div>`;
+  });
+  if (stepLog.length === 0) sHTML += `<div style="color:var(--muted);font-family:var(--mono);padding:10px 0">Empty string ε</div>`;
+
+  const finalSet = [...currentStates].join(',') || '∅';
+  let explainHTML = '<strong>📖 NFA Explanation</strong><br><br>';
+  explainHTML += `<span class="bullet">NFA starts with active states: <strong>{${curNFA.start}}</strong></span>`;
+  explainHTML += `<span class="bullet">Unlike DFA, NFA tracks <strong>all possible states at once</strong> — like exploring all paths in parallel.</span>`;
+  stepLog.forEach((s, i) => {
+    explainHTML += `<span class="bullet">Step ${i+1}: From {${[...s.from].join(',')}} reading <strong style="color:var(--yellow)">${s.sym}</strong> → reach {${[...s.to].join(',') || '∅'}}</span>`;
+  });
+  explainHTML += `<span class="bullet">Final active states: <strong>{${finalSet}}</strong></span>`;
+  if (accepted) {
+    explainHTML += `<span class="bullet" style="color:var(--green)">At least one final state is active → string is <strong>ACCEPTED ✅</strong></span>`;
+  } else {
+    explainHTML += `<span class="bullet" style="color:var(--red)">No final state is active → string is <strong>REJECTED ❌</strong></span>`;
+  }
+
+  document.getElementById('nfaSteps').innerHTML = sHTML;
+  document.getElementById('nfaVerdict').innerHTML = `<div class="verdict ${accepted?'accept':'reject'}">
+    ${accepted ? '✅ ACCEPTED' : '❌ REJECTED'} — final active states: {${finalSet}}
+  </div>`;
+  document.getElementById('nfaExplain').innerHTML = explainHTML;
+  document.getElementById('nfaResultCard').classList.remove('hidden');
+}
+
+// ============================================================
+// NFA → DFA CONVERSION (Subset Construction)
+// ============================================================
+function runConvert() {
+  const nfa = curConv;
+  const alpha = nfa.alphabet;
+
+  // Subset construction
+  const startSet = JSON.stringify([nfa.start]);
+  const queue = [[nfa.start]];
+  const visited = {};
+  const dfaTable = {};
+  const dfaFinals = [];
+
+  while (queue.length) {
+    const set = queue.shift();
+    const key = JSON.stringify(set.slice().sort());
+    if (visited[key]) continue;
+    visited[key] = true;
+
+    // check if this DFA state is final
+    if (set.some(s => nfa.finals.includes(s))) dfaFinals.push(key);
+
+    dfaTable[key] = {};
+    for (const sym of alpha) {
+      const nextSet = [];
+      for (const s of set) {
+        const targets = (nfa.nfaDelta[s] && nfa.nfaDelta[s][sym]) || [];
+        targets.forEach(t => { if (!nextSet.includes(t)) nextSet.push(t); });
+      }
+      nextSet.sort();
+      const nextKey = JSON.stringify(nextSet);
+      dfaTable[key][sym] = nextKey;
+      if (nextSet.length > 0 && !visited[nextKey]) queue.push(nextSet);
+      if (nextSet.length === 0 && !visited[nextKey]) {
+        visited[nextKey] = true;
+        dfaTable[nextKey] = {};
+        alpha.forEach(s => dfaTable[nextKey][s] = nextKey);
+      }
+    }
+  }
+
+  // Build readable names
+  const stateNames = {};
+  const orderedKeys = Object.keys(dfaTable);
+  orderedKeys.forEach((k, i) => {
+    const arr = JSON.parse(k);
+    stateNames[k] = arr.length === 0 ? '∅' : arr.length === 1 ? arr[0] : '{'+arr.join(',')+'}';
+  });
+
+  // Steps explanation
+  let stepsHTML = '';
+  stepsHTML += `<div class="info-box"><strong>Key Rule:</strong> In subset construction, each <strong>set of NFA states</strong> becomes <strong>one DFA state</strong>. If any NFA state in a set is a final state, that DFA state is also final.</div>`;
+
+  const stepRows = Object.entries(dfaTable).map(([k, trans], i) => {
+    const arr = JSON.parse(k);
+    const isFinal = dfaFinals.includes(k);
+    const isStart = k === JSON.stringify([nfa.start]);
+    const transDesc = alpha.map(sym => {
+      const nk = trans[sym];
+      const narr = JSON.parse(nk);
+      const nfaSteps = arr.map(s => {
+        const t = (nfa.nfaDelta[s] && nfa.nfaDelta[s][sym]) || [];
+        return `δ(${s},${sym})={${t.join(',')||'∅'}}`;
+      }).join(', ');
+      return `On <strong style="color:var(--yellow)">${sym}</strong>: ${nfaSteps} → union = <strong>${stateNames[nk]}</strong>`;
+    }).join('<br>');
+
+    return `<div class="convert-row">
+      <div class="convert-num">${i+1}</div>
+      <div class="convert-text">
+        <strong>DFA State: ${stateNames[k]}</strong> ${isStart?'<span style="color:var(--accent)">[start]</span>':''} ${isFinal?'<span style="color:var(--green)">[final — contains NFA final state]</span>':''}<br>
+        ${transDesc}
+      </div>
+    </div>`;
+  });
+  stepsHTML += stepsHTML + stepRows.join('');
+
+  // Build DFA table HTML
+  let tableHTML = `<table class="ttable"><thead><tr><th>State</th>${alpha.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>`;
+  Object.entries(dfaTable).forEach(([k, trans]) => {
+    const isFinal = dfaFinals.includes(k);
+    const isStart = k === JSON.stringify([nfa.start]);
+    const prefix = (isStart?'→ ':'') + (isFinal?'* ':'');
+    tableHTML += `<tr ${isFinal?'class="hl"':''}><td style="font-family:var(--mono)">${prefix}${stateNames[k]}</td>`;
+    alpha.forEach(sym => {
+      tableHTML += `<td style="font-family:var(--mono)">${stateNames[trans[sym]]}</td>`;
+    });
+    tableHTML += `</tr>`;
+  });
+  tableHTML += '</tbody></table>';
+
+  // Summary explanation
+  let explainHTML = `<strong>📖 What Just Happened?</strong><br><br>`;
+  explainHTML += `<span class="bullet">The NFA had <strong>${nfa.states.length} states</strong>. The DFA has <strong>${Object.keys(dfaTable).length} states</strong>.</span>`;
+  explainHTML += `<span class="bullet">Each DFA state represents a <strong>set of NFA states</strong> that can be active simultaneously.</span>`;
+  explainHTML += `<span class="bullet">DFA final states: <strong>${dfaFinals.map(k=>stateNames[k]).join(', ')}</strong> — these contain at least one NFA final state.</span>`;
+  explainHTML += `<span class="bullet">The DFA and NFA accept <strong>exactly the same strings</strong> — they are equivalent.</span>`;
+
+  // Draw converted DFA
+  drawConvertedDFA('convSvg', dfaTable, stateNames, JSON.stringify([nfa.start]), dfaFinals, alpha);
+
+  document.getElementById('convSteps').innerHTML = stepsHTML;
+  document.getElementById('convTable').innerHTML = tableHTML;
+  document.getElementById('convExplain').innerHTML = explainHTML;
+  document.getElementById('convResultCard').classList.remove('hidden');
+}
+
+// ============================================================
+// DRAWING
+// ============================================================
+const C = { start:'#7dd3fc', final:'#00ff88', normal:'#546e8a', edge:'#ffd600', edgeB:'#ff4466', selfEdge:'#b388ff', arrow:'#94a3b8' };
+
+function drawDFADiagram(svgId, dfa, activeStates) {
+  const svg = document.getElementById(svgId);
+  svg.innerHTML = '';
+  addDefs(svg);
+
+  dfa.edges.forEach(e => drawEdge(svg, e, dfa.layout));
+
+  dfa.states.forEach(s => {
+    const [cx, cy] = dfa.layout[s];
+    const isStart = s === dfa.start;
+    const isFinal = dfa.finals.includes(s);
+    const isActive = activeStates.includes(s);
+    drawState(svg, cx, cy, s, isStart, isFinal, isActive);
+  });
+}
+
+function drawNFADiagram(svgId, nfa) {
+  const svg = document.getElementById(svgId);
+  svg.innerHTML = '';
+  addDefs(svg);
+  nfa.edges.forEach(e => drawEdge(svg, e, nfa.layout));
+  nfa.states.forEach(s => {
+    const [cx, cy] = nfa.layout[s];
+    drawState(svg, cx, cy, s, s===nfa.start, nfa.finals.includes(s), false);
+  });
+}
+
+function drawConvertedDFA(svgId, dfaTable, stateNames, startKey, dfaFinals, alpha) {
+  const svg = document.getElementById(svgId);
+  svg.innerHTML = '';
+  addDefs(svg);
+
+  const keys = Object.keys(dfaTable);
+  const n = keys.length;
+  const positions = {};
+  const cols = Math.min(n, 4);
+  const rows = Math.ceil(n / cols);
+  keys.forEach((k, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    positions[k] = [100 + col * 160, 60 + row * 120];
+  });
+
+  // Draw edges
+  keys.forEach(k => {
+    const [fx, fy] = positions[k];
+    alpha.forEach(sym => {
+      const tk = dfaTable[k][sym];
+      if (!positions[tk]) return;
+      const [tx, ty] = positions[tk];
+      if (k === tk) {
+        drawSelfLoop(svg, fx, fy, sym, C.selfEdge);
+      } else {
+        // check reverse
+        const rev = dfaTable[tk] && dfaTable[tk][alpha[0]] === k;
+        drawSimpleEdge(svg, fx, fy, tx, ty, sym, sym==='0'||sym==='a' ? C.edge : C.edgeB, rev ? -30 : 0);
+      }
+    });
+  });
+
+  keys.forEach(k => {
+    const [cx, cy] = positions[k];
+    drawState(svg, cx, cy, stateNames[k], k===startKey, dfaFinals.includes(k), false);
+  });
+}
+
+function addDefs(svg) {
+  const defs = makeSVG('defs');
+  ['arr','arry','arrr','arrp','arra'].forEach((id,i) => {
+    const colors = ['#94a3b8','#ffd600','#ff4466','#b388ff','#00e5ff'];
+    const m = makeSVG('marker');
+    m.setAttribute('id', id);
+    m.setAttribute('markerWidth','8');m.setAttribute('markerHeight','8');
+    m.setAttribute('refX','6');m.setAttribute('refY','3');m.setAttribute('orient','auto');
+    const p = makeSVG('path');
+    p.setAttribute('d','M0,0 L0,6 L8,3 z');
+    p.setAttribute('fill', colors[i]);
+    m.appendChild(p); defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+}
+
+function drawState(svg, cx, cy, label, isStart, isFinal, isActive) {
+  if (isStart) {
+    const line = makeSVG('line');
+    line.setAttribute('x1', cx-70); line.setAttribute('y1', cy);
+    line.setAttribute('x2', cx-38); line.setAttribute('y2', cy);
+    line.setAttribute('stroke', C.start); line.setAttribute('stroke-width','2');
+    line.setAttribute('marker-end','url(#arra)');
+    svg.appendChild(line);
+  }
+  const circle = makeSVG('circle');
+  circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', 32);
+  circle.setAttribute('fill', isActive ? 'rgba(0,229,255,0.1)' : (isFinal ? 'rgba(0,255,136,0.07)' : '#0e1520'));
+  circle.setAttribute('stroke', isFinal ? C.final : (isStart ? C.start : C.normal));
+  circle.setAttribute('stroke-width', isActive ? '3' : '2');
+  svg.appendChild(circle);
+  if (isFinal) {
+    const inner = makeSVG('circle');
+    inner.setAttribute('cx', cx); inner.setAttribute('cy', cy); inner.setAttribute('r', 25);
+    inner.setAttribute('fill','none');
+    inner.setAttribute('stroke', C.final); inner.setAttribute('stroke-width','1.5');
+    svg.appendChild(inner);
+  }
+  const text = makeSVG('text');
+  text.setAttribute('x', cx); text.setAttribute('y', cy+5);
+  text.setAttribute('text-anchor','middle');
+  text.setAttribute('fill', isFinal ? C.final : (isStart ? C.start : '#8090a0'));
+  text.setAttribute('font-size', label.length > 3 ? '10' : '13');
+  text.setAttribute('font-weight','bold');
+  text.setAttribute('font-family','Space Mono, monospace');
+  text.textContent = label;
+  svg.appendChild(text);
+}
+
+function drawEdge(svg, edge, layout) {
+  const [fx, fy] = layout[edge.from];
+  const [tx, ty] = layout[edge.to];
+  const color = edge.sym.includes('a') || edge.sym.includes('0') ? C.edge : C.edgeB;
+  if (edge.self) {
+    drawSelfLoop(svg, fx, fy, edge.sym, color);
+  } else {
+    drawSimpleEdge(svg, fx, fy, tx, ty, edge.sym, color, edge.curve || 0);
+  }
+}
+
+function drawSelfLoop(svg, cx, cy, label, color) {
+  const path = makeSVG('path');
+  const d = `M ${cx-15} ${cy-30} Q ${cx} ${cy-85} ${cx+15} ${cy-30}`;
+  path.setAttribute('d', d);
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke', color); path.setAttribute('stroke-width','2');
+  path.setAttribute('marker-end', colorToMarker(color));
+  svg.appendChild(path);
+  const t = makeSVG('text');
+  t.setAttribute('x', cx); t.setAttribute('y', cy-72);
+  t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill', color); t.setAttribute('font-size','12');
+  t.setAttribute('font-weight','bold'); t.setAttribute('font-family','Space Mono, monospace');
+  t.textContent = label;
+  svg.appendChild(t);
+}
+
+function drawSimpleEdge(svg, fx, fy, tx, ty, label, color, curve) {
+  const mx = (fx+tx)/2, my = (fy+ty)/2;
+  const dx = tx-fx, dy = ty-fy;
+  const len = Math.sqrt(dx*dx+dy*dy);
+  const nx = -dy/len, ny = dx/len;
+  const cpx = mx + nx*curve, cpy = my + ny*curve;
+
+  const path = makeSVG('path');
+  const d = curve ? `M ${fx} ${fy} Q ${cpx} ${cpy} ${tx} ${ty}` : `M ${fx} ${fy} L ${tx} ${ty}`;
+  path.setAttribute('d', d);
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke', color); path.setAttribute('stroke-width','2');
+  path.setAttribute('marker-end', colorToMarker(color));
+  svg.appendChild(path);
+
+  const lx = curve ? cpx : mx, ly = curve ? cpy - 12 : my - 10;
+  const t = makeSVG('text');
+  t.setAttribute('x', lx); t.setAttribute('y', ly);
+  t.setAttribute('text-anchor','middle');
+  t.setAttribute('fill', color); t.setAttribute('font-size','12');
+  t.setAttribute('font-weight','bold'); t.setAttribute('font-family','Space Mono, monospace');
+  t.textContent = label;
+  svg.appendChild(t);
+}
+
+function colorToMarker(color) {
+  if (color === C.edge) return 'url(#arry)';
+  if (color === C.edgeB) return 'url(#arrr)';
+  if (color === C.selfEdge) return 'url(#arrp)';
+  if (color === C.start) return 'url(#arra)';
+  return 'url(#arr)';
+}
+
+function makeSVG(tag) {
+  return document.createElementNS('http://www.w3.org/2000/svg', tag);
+}
+
+// ============================================================
+// TABLE BUILDERS
+// ============================================================
+function buildTransTable(containerId, states, alpha, delta, start, finals, isNFA) {
+  let h = `<table class="ttable"><thead><tr><th>State</th>${alpha.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>`;
+  states.forEach(s => {
+    const isF = finals.includes(s), isS = s === start;
+    const pre = (isS?'→ ':'') + (isF?'* ':'');
+    h += `<tr ${isF?'class="hl"':''}><td style="font-family:var(--mono)">${pre}${s}</td>`;
+    alpha.forEach(sym => {
+      const val = delta[s][sym];
+      h += `<td style="font-family:var(--mono)">${isNFA ? '{'+val.join(',')+'}' : val}</td>`;
+    });
+    h += '</tr>';
+  });
+  h += '</tbody></table>';
+  h += `<div style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);margin-top:8px">→ = start state &nbsp;|&nbsp; * = final/accept state</div>`;
+  document.getElementById(containerId).innerHTML = h;
+}
+
+function buildNFATransTable(containerId, nfa) {
+  let h = `<table class="ttable"><thead><tr><th>State</th>${nfa.alphabet.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>`;
+  nfa.states.forEach(s => {
+    const isF = nfa.finals.includes(s), isS = s === nfa.start;
+    const pre = (isS?'→ ':'') + (isF?'* ':'');
+    h += `<tr ${isF?'class="hl"':''}><td style="font-family:var(--mono)">${pre}${s}</td>`;
+    nfa.alphabet.forEach(sym => {
+      const val = (nfa.delta[s][sym] || []);
+      h += `<td style="font-family:var(--mono)">{${val.join(',') || '∅'}}</td>`;
+    });
+    h += '</tr>';
+  });
+  h += '</tbody></table>';
+  h += `<div style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);margin-top:8px">→ = start state &nbsp;|&nbsp; * = final/accept state &nbsp;|&nbsp; ∅ = dead/no transition</div>`;
+  document.getElementById(containerId).innerHTML = h;
+}
+
+function buildLegend(containerId, start, finals) {
+  document.getElementById(containerId).innerHTML = `
+    <span><span class="ldot" style="background:var(--accent)"></span>Start state</span>
+    <span><span class="ldot" style="background:var(--green)"></span>Final/Accept state (double circle)</span>
+    <span><span class="ldot" style="background:var(--yellow)"></span>Transition on first symbol</span>
+    <span><span class="ldot" style="background:var(--red)"></span>Transition on second symbol</span>
+  `;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('show');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
