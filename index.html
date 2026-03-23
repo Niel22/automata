@@ -412,6 +412,15 @@ header p {
       <span class="bullet">4) Read last symbol <strong>a</strong>: from <strong>q1</strong> follow the <strong>a</strong>-arrow to <strong>q0</strong>. (Now 2 a's — even.)</span>
       <span class="bullet">5) Input finished and we are in <strong>q0</strong>, which is an accepting state → string is <strong style="color:var(--green)">ACCEPTED</strong>. This shows why "aba" belongs to the language.</span>
       <span class="bullet"><strong>How transitions "work" (conceptual):</strong> Each arrow is a rule: "If you are in state S and you read symbol x, go to state T." The machine keeps exactly one current state and updates it after reading each symbol.</span>
+      <div style="margin-top:12px">
+        <div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-bottom:8px"><strong>Example trace table — input "aba"</strong></div>
+        <table class="ttable" style="margin-top:6px"><thead><tr><th>#</th><th>Current State</th><th>Read</th><th>Next State</th></tr></thead><tbody>
+          <tr><td>1</td><td>q0</td><td>a</td><td>q1</td></tr>
+          <tr><td>2</td><td>q1</td><td>b</td><td>q1</td></tr>
+          <tr class="hl"><td>3</td><td>q1</td><td>a</td><td>q0</td></tr>
+        </tbody></table>
+        <div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-top:8px">Final state: <strong style="color:var(--green)">q0</strong> → <strong style="color:var(--green)">ACCEPTED</strong></div>
+      </div>
     </div>
   </div>
   
@@ -468,6 +477,15 @@ header p {
       <span class="bullet">3) Read '0': A on 0 → {A,B} (there are now two active states simultaneously).</span>
       <span class="bullet">4) After input done, one active state is B which is final → <strong style="color:var(--green)">ACCEPT</strong>.</span>
       <span class="bullet"><strong>ε-transitions and closures:</strong> If the NFA has ε-moves, you must also include every state reachable by ε before or after symbol transitions (the ε-closure). That set-of-states bookkeeping is what subset construction uses to build a DFA.</span>
+      <div style="margin-top:12px">
+        <div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-bottom:8px"><strong>Example active-set table — input "10"</strong></div>
+        <table class="ttable"><thead><tr><th>#</th><th>Active states (before)</th><th>Read</th><th>Active states (after)</th></tr></thead><tbody>
+          <tr><td>0</td><td>{A}</td><td>—</td><td>{A}</td></tr>
+          <tr><td>1</td><td>{A}</td><td>1</td><td>{A}</td></tr>
+          <tr class="hl"><td>2</td><td>{A}</td><td>0</td><td>{A, B}</td></tr>
+        </tbody></table>
+        <div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted);margin-top:8px">Final active set contains <strong style="color:var(--green)">B</strong> → <strong style="color:var(--green)">ACCEPTED</strong></div>
+      </div>
     </div>
   </div>
   
