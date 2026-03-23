@@ -4,7 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Automata Lab — DFA & NFA Explorer</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="Interactive Automata Lab — trace DFAs and NFAs, learn subset construction (NFA→DFA), and see step-by-step examples for regular languages over {a,b}." />
+<meta name="keywords" content="automata, DFA, NFA, subset construction, regular languages, theoretical computer science, automata lab" />
+<meta name="author" content="Automata Lab" />
+<link rel="canonical" href="https://example.com/automata" />
+<!-- Open Graph / Social Preview -->
+<meta property="og:title" content="Automata Lab — DFA & NFA Explorer" />
+<meta property="og:description" content="Trace DFAs and NFAs, convert NFAs to DFAs, and learn with step-by-step examples (even number of a's, epsilon-closure, and more)." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://example.com/automata" />
+<meta property="og:image" content="/automata/og.png" />
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Automata Lab — DFA & NFA Explorer" />
+<meta name="twitter:description" content="Interactive Automata Lab — trace DFAs and NFAs, convert NFAs to DFAs, and learn with examples and visual traces." />
+<meta name="twitter:image" content="/automata/og.png" />
+<link rel="icon" href="/favicon.ico" />
+<!-- JSON-LD structured data for richer previews -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Automata Lab — DFA & NFA Explorer",
+  "description": "Interactive Automata Lab to learn DFAs and NFAs with visual traces and NFA→DFA conversion.",
+  "url": "https://example.com/automata"
+}
+</script>
+<!-- Load Inter font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #080c14;
@@ -19,7 +46,7 @@
   --text: #e8f0fe;
   --muted: #546e8a;
   --mono: 'Space Mono', monospace;
-  --sans: 'Syne', sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -378,14 +405,38 @@ header p {
     </div>
   </div>
 
+  <div class="card hidden" id="nfaResultCard">
+    <div class="card-title">NFA Trace — All Active States</div>
+    <div id="nfaSteps"></div>
+    <div id="nfaVerdict"></div>
+    <div id="nfaExplain" class="explain"></div>
+  </div>
+
+  <div class="card hidden" id="dfaResultCard">
+    <div class="card-title">Trace Result</div>
+    <div class="steps-header">
+      <div>#</div><div>Current State</div><div>Read</div><div>Next State</div>
+    </div>
+    <div id="dfaSteps"></div>
+    <div id="dfaVerdict"></div>
+    <div id="dfaExplain" class="explain"></div>
+  </div>
+
   <div class="card">
     <div class="card-title">DFA — Quick Definition & Example</div>
     <div class="explain">
-      <span class="bullet"><strong>DFA:</strong> Deterministic Finite Automaton — exactly one transition for each state and input symbol.</span>
-      <span class="bullet"><strong>Use:</strong> Recognize regular languages by reading input left-to-right.</span>
-      <span class="bullet"><strong>Example (even number of a's):</strong> States: <strong>q0</strong> (even), <strong>q1</strong> (odd). Start: <strong>q0</strong>. Accept: <strong>q0</strong>.</span>
-      <span class="bullet"><strong>Transitions:</strong> q0 --a--> q1, q0 --b--> q0; q1 --a--> q0, q1 --b--> q1.</span>
-      <span class="bullet"><strong>Trace for "aba":</strong> Start at q0 → read a → q1 (1 a) → read b → q1 (still 1 a) → read a → q0 (2 a) → end in q0 → <strong style="color:var(--green)">ACCEPT</strong>.</span>
+      <span class="bullet"><strong>DFA (Deterministic Finite Automaton):</strong> A DFA is a simple machine that reads an input string one symbol at a time. For every state and every symbol in the alphabet there is exactly one defined next state — no ambiguity. Think of it like a single guided path through a flowchart.</span>
+      <span class="bullet"><strong>Plain language:</strong> At each step the DFA looks at the next symbol and follows the one arrow it is allowed to follow. There are no guesses or branches.</span>
+      <span class="bullet"><strong>Why useful:</strong> DFAs are used to check simple structural rules about strings (e.g., "does this string end with b?" or "does it contain an even number of a's?").</span>
+      <span class="bullet"><strong>Concrete example — even number of a's:</strong> States: <strong>q0</strong> (we have seen an even number of a's so far), <strong>q1</strong> (we have seen an odd number of a's). Start at <strong>q0</strong>. Accepting state: <strong>q0</strong> because 0 is even.</span>
+      <span class="bullet"><strong>Transitions (rules):</strong> q0 --a--> q1 (reading an a flips parity), q0 --b--> q0 (reading b doesn't change a-count); q1 --a--> q0, q1 --b--> q1.</span>
+      <span class="bullet"><strong>Step-by-step trace for <em>"aba"</em> (detailed):</span>
+      <span class="bullet">1) Start at <strong>q0</strong>. (We have seen 0 a's — even.)</span>
+      <span class="bullet">2) Read first symbol <strong>a</strong>: from <strong>q0</strong> follow the <strong>a</strong>-arrow to <strong>q1</strong>. (Seen 1 a — odd.)</span>
+      <span class="bullet">3) Read next symbol <strong>b</strong>: from <strong>q1</strong> follow the <strong>b</strong>-arrow to <strong>q1</strong>. (Still 1 a — odd.)</span>
+      <span class="bullet">4) Read last symbol <strong>a</strong>: from <strong>q1</strong> follow the <strong>a</strong>-arrow to <strong>q0</strong>. (Now 2 a's — even.)</span>
+      <span class="bullet">5) Input finished and we are in <strong>q0</strong>, which is an accepting state → string is <strong style="color:var(--green)">ACCEPTED</strong>. This shows why "aba" belongs to the language.</span>
+      <span class="bullet"><strong>How transitions "work" (conceptual):</strong> Each arrow is a rule: "If you are in state S and you read symbol x, go to state T." The machine keeps exactly one current state and updates it after reading each symbol.</span>
     </div>
   </div>
 
@@ -401,16 +452,7 @@ header p {
     <div class="card-title">Transition Table</div>
     <div id="dfaTable"></div>
   </div>
-
-  <div class="card hidden" id="dfaResultCard">
-    <div class="card-title">Trace Result</div>
-    <div class="steps-header">
-      <div>#</div><div>Current State</div><div>Read</div><div>Next State</div>
-    </div>
-    <div id="dfaSteps"></div>
-    <div id="dfaVerdict"></div>
-    <div id="dfaExplain" class="explain"></div>
-  </div>
+ 
 </div>
 
 <!-- ===== NFA TAB ===== -->
@@ -429,10 +471,16 @@ header p {
   <div class="card">
     <div class="card-title">NFA — Quick Definition & Example</div>
     <div class="explain">
-      <span class="bullet"><strong>NFA:</strong> Nondeterministic Finite Automaton — a state may have multiple possible next states for the same input, and may include ε-transitions.</span>
-      <span class="bullet"><strong>Key idea:</strong> NFA explores many possible paths in parallel; if any path accepts, the NFA accepts.</span>
-      <span class="bullet"><strong>Example:</strong> From state A on symbol 0 you might go to both A and B. If any resulting path ends in a final state after consuming the input, the NFA accepts.</span>
-      <span class="bullet"><strong>Short trace (NFA ends-with-0) reading "10":</strong> start {A} → read 1 → {A} → read 0 → {A,B} → B is final → <strong style="color:var(--green)">ACCEPT</strong>.</span>
+      <span class="bullet"><strong>NFA (Nondeterministic Finite Automaton):</strong> An NFA is like a DFA but it is allowed to "branch" — for the same state and input symbol the machine may move to zero, one, or several next states. It may also use ε (epsilon) moves that change state without consuming input.</span>
+      <span class="bullet"><strong>Plain language:</strong> Picture exploring a maze with multiple corridors; the NFA is allowed to try multiple corridors at once. If any one exploration reaches an accepting room after reading the whole input, the NFA accepts.</span>
+      <span class="bullet"><strong>Key difference from DFA:</strong> DFA has exactly one next state per symbol; NFA can have many. This does not make NFAs more powerful for regular languages — every NFA can be converted to an equivalent DFA.</span>
+      <span class="bullet"><strong>Example (ends-with-0):</strong> State A can on symbol 0 either stay in A or jump to B simultaneously — after reading a 0 some paths are in A and some in B. If B is final and any path ends in B after the full input, the NFA accepts.</span>
+      <span class="bullet"><strong>Trace example reading "10" (detailed):</strong></span>
+      <span class="bullet">1) Start active set {A}.</span>
+      <span class="bullet">2) Read '1': A on 1 → {A} (active set remains {A}).</span>
+      <span class="bullet">3) Read '0': A on 0 → {A,B} (there are now two active states simultaneously).</span>
+      <span class="bullet">4) After input done, one active state is B which is final → <strong style="color:var(--green)">ACCEPT</strong>.</span>
+      <span class="bullet"><strong>ε-transitions and closures:</strong> If the NFA has ε-moves, you must also include every state reachable by ε before or after symbol transitions (the ε-closure). That set-of-states bookkeeping is what subset construction uses to build a DFA.</span>
     </div>
   </div>
 
@@ -447,13 +495,7 @@ header p {
     <div class="card-title">Transition Table</div>
     <div id="nfaTable"></div>
   </div>
-
-  <div class="card hidden" id="nfaResultCard">
-    <div class="card-title">NFA Trace — All Active States</div>
-    <div id="nfaSteps"></div>
-    <div id="nfaVerdict"></div>
-    <div id="nfaExplain" class="explain"></div>
-  </div>
+ 
 </div>
 
 <!-- ===== CONVERT TAB ===== -->
@@ -485,32 +527,43 @@ header p {
     <div class="card-title">What is a Finite Automaton?</div>
     <div class="explain" style="border-left-color:var(--accent)">
       A Finite Automaton is an <strong>abstract machine</strong> that reads a string one symbol at a time and decides to <strong style="color:var(--green)">ACCEPT</strong> or <strong style="color:var(--red)">REJECT</strong> it.<br><br>
-      Think of it like a <strong>security gate</strong> — you enter a code symbol by symbol, and at the end it either lets you in or not.
+      Simple explanation for beginners: imagine a small robot that walks through rooms. The robot has a rulebook: "If you're in room X and you see symbol s, go to room Y." The robot starts in a fixed room and follows the rules while reading the input left-to-right. After the last symbol, if the robot is in a special "accept" room, the string is accepted.
+      <br><br>
+      Example: The "even number of a's" robot has two rooms: <strong>q0</strong> (even) and <strong>q1</strong> (odd). Reading an <strong>a</strong> flips parity (q0↔q1); reading a <strong>b</strong> keeps you in the same room. If you end in q0 the string is accepted.
     </div>
   </div>
   <div class="card">
     <div class="card-title">Formal Definition — 5 Tuple</div>
     <div class="explain" style="border-left-color:var(--yellow)">
       <strong>M = (Q, Σ, q₀, F, δ)</strong><br><br>
-      <span class="bullet"><strong>Q</strong> — Finite set of all states (all the "rooms")</span>
-      <span class="bullet"><strong>Σ (Sigma)</strong> — Alphabet — the symbols the machine can read</span>
-      <span class="bullet"><strong>q₀</strong> — Start state — where the machine always begins</span>
-      <span class="bullet"><strong>F</strong> — Set of Final/Accept states — double circle in diagrams</span>
-      <span class="bullet"><strong>δ (delta)</strong> — Transition function — the movement rules</span>
+      <span class="bullet"><strong>Q</strong> — Finite set of all states (all the "rooms"). Example: Q = {q0, q1}.</span>
+      <span class="bullet"><strong>Σ (Sigma)</strong> — Alphabet — the symbols the machine reads (for our examples Σ = {a,b}).</span>
+      <span class="bullet"><strong>q₀</strong> — Start state — where the machine begins (e.g., q0).</span>
+      <span class="bullet"><strong>F</strong> — Set of Final/Accept states — ending in any of these means ACCEPT (drawn as double circles).</span>
+      <span class="bullet"><strong>δ (delta)</strong> — Transition rule: for a DFA, δ: Q × Σ → Q (exactly one next state). For an NFA, δ: Q × (Σ∪{ε}) → P(Q) (a set of possible next states; ε means move without consuming input).</span>
+      <span class="bullet">Example: For the even-a DFA, δ(q0,a)=q1, δ(q0,b)=q0, δ(q1,a)=q0, δ(q1,b)=q1.</span>
     </div>
   </div>
   <div class="card">
     <div class="card-title">DFA vs NFA</div>
-    <table class="ttable">
-      <thead><tr><th>Feature</th><th>DFA</th><th>NFA</th></tr></thead>
-      <tbody>
-        <tr><td>Next states</td><td>Exactly ONE</td><td>Multiple possible</td></tr>
-        <tr><td>ε transitions</td><td>❌ Not allowed</td><td>✅ Allowed</td></tr>
-        <tr><td>Dead state</td><td>Required</td><td>Not required</td></tr>
-        <tr><td>Randomness</td><td>None</td><td>Chooses best path</td></tr>
-        <tr><td>Power</td><td colspan="2" style="color:var(--yellow)">Equal — every NFA has an equivalent DFA</td></tr>
-      </tbody>
-    </table>
+    <div class="explain" style="border-left-color:var(--purple)">
+      <span class="bullet"><strong>Key differences:</strong></span>
+      <span class="bullet"><strong>Determinism:</strong> DFA — for each (state, symbol) there is exactly one next state. NFA — for each (state, symbol) there may be zero, one, or many next states.</span>
+      <span class="bullet"><strong>ε-transitions:</strong> DFA — not allowed. NFA — allowed; these let the machine change state without reading a symbol.</span>
+      <span class="bullet"><strong>Computation model:</strong> DFA simulates a single path through states. NFA conceptually explores many paths in parallel and accepts if any path accepts.</span>
+      <span class="bullet"><strong>Expressive power:</strong> They are equivalent for regular languages: every NFA can be converted to a DFA (subset construction), and every DFA is trivially an NFA.</span>
+      <span class="bullet"><strong>Common misconception:</strong> "NFA only number while DFA only alphabet" is incorrect — both machines operate on the same concept: an alphabet (symbols). The difference is determinism vs nondeterminism, not the type of input.</span>
+      <span class="bullet"><strong>Practical note:</strong> NFAs are often easier to design; DFAs are easier to implement because they have no branching. Converting an NFA to DFA may increase the number of states (in worst case exponentially), but it yields a machine with deterministic transitions.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Common misconceptions — short Q&A</div>
+    <div class="explain">
+      <span class="bullet"><strong>Q:</strong> Is "aba" not accepted by the even-a DFA because it has 2 a's?<br><strong>A:</strong> It is accepted — two a's is even. If earlier content said otherwise, it was a mistake; corrected examples now show "aba" accepted.</span>
+      <span class="bullet"><strong>Q:</strong> Is NFA "numbers only" and DFA "alphabet only"?<br><strong>A:</strong> No — both use an alphabet (set of symbols). NFA/DFA describe how states change when reading alphabet symbols.</span>
+      <span class="bullet"><strong>Q:</strong> When converting NFA→DFA what is the central idea?<br><strong>A:</strong> Each DFA state represents a set of possible NFA states (the subset construction). Track the union of NFA outcomes for each input symbol; include ε-closures when needed.</span>
+    </div>
   </div>
   <div class="card">
     <div class="card-title">How to Read a State Diagram</div>
@@ -619,6 +672,19 @@ const NFA_PRESETS = [
     ]
   },
   {
+    id:'nfa_eps', label:'Epsilon-closure example', alphabet:['a','b'],
+    desc:'NFA that uses ε-transitions. It accepts "a" or "b" by taking an ε-branch to the correct path.',
+    states:['S','A','B','C'], start:'S', finals:['C'],
+    delta:{ S:{'eps':['A','B'],'a':[],'b':[]}, A:{'eps':[],'a':['C'],'b':[]}, B:{'eps':[],'a':[],'b':['C']}, C:{'eps':[],'a':[],'b':[]} },
+    layout:{ S:[100,110], A:[260,60], B:[260,160], C:[420,110] },
+    edges:[
+      {from:'S',to:'A',sym:'ε',curve:-30},
+      {from:'S',to:'B',sym:'ε',curve:30},
+      {from:'A',to:'C',sym:'a',curve:0},
+      {from:'B',to:'C',sym:'b',curve:0},
+    ]
+  },
+  {
     id:'nfa_ends1', label:'Ends with 1', alphabet:['0','1'],
     desc:'NFA that accepts all strings over {0,1} that <strong>end with 1</strong>.',
     states:['A','B'], start:'A', finals:['B'],
@@ -648,6 +714,12 @@ const CONV_PRESETS = [
     desc:'Convert the NFA for strings ending with 0 into an equivalent DFA. Watch how NFA state-sets become single DFA states.',
     states:['A','B'], start:'A', finals:['B'],
     nfaDelta:{ A:{'0':['A','B'],'1':['A']}, B:{'0':[],'1':[]} },
+  },
+  {
+    id:'conv_eps', label:'Epsilon NFA → DFA', alphabet:['a','b'],
+    desc:'Convert an NFA that uses ε-transitions into a DFA — demonstrates ε-closure in subset construction.',
+    states:['S','A','B','C'], start:'S', finals:['C'],
+    nfaDelta:{ S:{'eps':['A','B'],'a':[],'b':[]}, A:{'eps':[],'a':['C'],'b':[]}, B:{'eps':[],'a':[],'b':['C']}, C:{'eps':[],'a':[],'b':[]} },
   },
   {
     id:'conv2', label:'Ends with 1', alphabet:['0','1'],
@@ -812,18 +884,35 @@ function runNFA() {
     }
   }
 
-  // Subset simulation
-  let currentStates = new Set([curNFA.start]);
+  // Subset simulation with ε-closure support
+  const deltaSrc = curNFA.delta || curNFA.nfaDelta || {};
+  function epsClosureOf(states) {
+    const stack = [...states];
+    const seen = new Set(states);
+    while (stack.length) {
+      const s = stack.pop();
+      const epsTargets = (deltaSrc[s] && (deltaSrc[s]['eps'] || deltaSrc[s]['ε'] || [])) || [];
+      for (const t of epsTargets) {
+        if (!seen.has(t)) { seen.add(t); stack.push(t); }
+      }
+    }
+    return [...seen];
+  }
+
+  let currentStates = new Set(epsClosureOf([curNFA.start]));
   const stepLog = [];
 
   for (const sym of str) {
     const nextStates = new Set();
     for (const s of currentStates) {
-      const targets = curNFA.delta[s][sym] || [];
+      const targets = (deltaSrc[s] && (deltaSrc[s][sym] || [])) || [];
       targets.forEach(t => nextStates.add(t));
     }
-    stepLog.push({ sym, from: new Set(currentStates), to: new Set(nextStates) });
-    currentStates = nextStates;
+    // include epsilon-closure of the reached states
+    const closed = epsClosureOf([...nextStates]);
+    const closedSet = new Set(closed);
+    stepLog.push({ sym, from: new Set(currentStates), to: closedSet });
+    currentStates = closedSet;
   }
 
   const accepted = [...currentStates].some(s => curNFA.finals.includes(s));
@@ -869,8 +958,24 @@ function runConvert() {
   const alpha = nfa.alphabet;
 
   // Subset construction
-  const startSet = JSON.stringify([nfa.start]);
-  const queue = [[nfa.start]];
+  // compute epsilon-closure-aware start set
+  const deltaSrc = nfa.nfaDelta || nfa.delta || {};
+  function epsClosure(setArr) {
+    const stack = [...setArr];
+    const seen = new Set(setArr);
+    while (stack.length) {
+      const s = stack.pop();
+      const epsTargets = (deltaSrc[s] && (deltaSrc[s]['eps'] || deltaSrc[s]['ε'] || [])) || [];
+      for (const t of epsTargets) {
+        if (!seen.has(t)) { seen.add(t); stack.push(t); }
+      }
+    }
+    return [...seen].sort();
+  }
+
+  const startArr = epsClosure([nfa.start]);
+  const startSet = JSON.stringify(startArr);
+  const queue = [startArr];
   const visited = {};
   const dfaTable = {};
   const dfaFinals = [];
@@ -886,12 +991,15 @@ function runConvert() {
 
     dfaTable[key] = {};
     for (const sym of alpha) {
-      const nextSet = [];
+      // union of targets for sym from every NFA state in 'set'
+      let union = [];
       for (const s of set) {
         const targets = (nfa.nfaDelta[s] && nfa.nfaDelta[s][sym]) || [];
-        targets.forEach(t => { if (!nextSet.includes(t)) nextSet.push(t); });
+        targets.forEach(t => { if (!union.includes(t)) union.push(t); });
       }
-      nextSet.sort();
+      // after taking symbol transitions, include epsilon-closure of that union
+      const closed = epsClosure(union);
+      const nextSet = closed;
       const nextKey = JSON.stringify(nextSet);
       dfaTable[key][sym] = nextKey;
       if (nextSet.length > 0 && !visited[nextKey]) queue.push(nextSet);
@@ -1176,7 +1284,10 @@ function buildTransTable(containerId, states, alpha, delta, start, finals, isNFA
 }
 
 function buildNFATransTable(containerId, nfa) {
-  let h = `<table class="ttable"><thead><tr><th>State</th>${nfa.alphabet.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>`;
+  // detect if any state has epsilon transitions (stored under 'eps' or 'ε')
+  const hasEps = nfa.states.some(s => ((nfa.delta && (nfa.delta[s] && (nfa.delta[s]['eps'] || nfa.delta[s]['ε']))) || false));
+  const epsCol = hasEps ? ['ε'] : [];
+  let h = `<table class="ttable"><thead><tr><th>State</th>${nfa.alphabet.map(s=>`<th>${s}</th>`).join('')}${epsCol.map(e=>`<th>${e}</th>`).join('')}</tr></thead><tbody>`;
   nfa.states.forEach(s => {
     const isF = nfa.finals.includes(s), isS = s === nfa.start;
     const pre = (isS?'→ ':'') + (isF?'* ':'');
@@ -1185,6 +1296,10 @@ function buildNFATransTable(containerId, nfa) {
       const val = (nfa.delta[s][sym] || []);
       h += `<td style="font-family:var(--mono)">{${val.join(',') || '∅'}}</td>`;
     });
+    if (hasEps) {
+      const ev = (nfa.delta[s]['eps'] || nfa.delta[s]['ε'] || []);
+      h += `<td style="font-family:var(--mono)">{${ev.join(',') || '∅'}}</td>`;
+    }
     h += '</tr>';
   });
   h += '</tbody></table>';
