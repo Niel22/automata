@@ -404,23 +404,7 @@ header p {
       <button class="run-btn" onclick="runDFA()">Trace ▶</button>
     </div>
   </div>
-
-  <div class="card hidden" id="nfaResultCard">
-    <div class="card-title">NFA Trace — All Active States</div>
-    <div id="nfaSteps"></div>
-    <div id="nfaVerdict"></div>
-    <div id="nfaExplain" class="explain"></div>
-  </div>
-
-  <div class="card hidden" id="dfaResultCard">
-    <div class="card-title">Trace Result</div>
-    <div class="steps-header">
-      <div>#</div><div>Current State</div><div>Read</div><div>Next State</div>
-    </div>
-    <div id="dfaSteps"></div>
-    <div id="dfaVerdict"></div>
-    <div id="dfaExplain" class="explain"></div>
-  </div>
+ 
 
   <div class="card">
     <div class="card-title">DFA — Quick Definition & Example</div>
@@ -451,6 +435,16 @@ header p {
   <div class="card">
     <div class="card-title">Transition Table</div>
     <div id="dfaTable"></div>
+  </div>
+  
+  <div class="card hidden" id="dfaResultCard">
+    <div class="card-title">Trace Result</div>
+    <div class="steps-header">
+      <div>#</div><div>Current State</div><div>Read</div><div>Next State</div>
+    </div>
+    <div id="dfaSteps"></div>
+    <div id="dfaVerdict"></div>
+    <div id="dfaExplain" class="explain"></div>
   </div>
  
 </div>
@@ -494,6 +488,13 @@ header p {
   <div class="card">
     <div class="card-title">Transition Table</div>
     <div id="nfaTable"></div>
+  </div>
+  
+  <div class="card hidden" id="nfaResultCard">
+    <div class="card-title">NFA Trace — All Active States</div>
+    <div id="nfaSteps"></div>
+    <div id="nfaVerdict"></div>
+    <div id="nfaExplain" class="explain"></div>
   </div>
  
 </div>
