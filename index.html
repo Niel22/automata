@@ -379,6 +379,17 @@ header p {
   </div>
 
   <div class="card">
+    <div class="card-title">DFA — Quick Definition & Example</div>
+    <div class="explain">
+      <span class="bullet"><strong>DFA:</strong> Deterministic Finite Automaton — exactly one transition for each state and input symbol.</span>
+      <span class="bullet"><strong>Use:</strong> Recognize regular languages by reading input left-to-right.</span>
+      <span class="bullet"><strong>Example (even number of a's):</strong> States: <strong>q0</strong> (even), <strong>q1</strong> (odd). Start: <strong>q0</strong>. Accept: <strong>q0</strong>.</span>
+      <span class="bullet"><strong>Transitions:</strong> q0 --a--> q1, q0 --b--> q0; q1 --a--> q0, q1 --b--> q1.</span>
+      <span class="bullet"><strong>Trace for "aba":</strong> Start at q0 → read a → q1 (1 a) → read b → q1 (still 1 a) → read a → q0 (2 a) → end in q0 → <strong style="color:var(--green)">ACCEPT</strong>.</span>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">State Diagram</div>
     <div class="diagram-wrap">
       <svg id="dfaSvg" viewBox="0 0 600 220" width="100%" height="220"></svg>
@@ -412,6 +423,16 @@ header p {
     <div class="input-row">
       <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
       <button class="run-btn" onclick="runNFA()">Trace ▶</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">NFA — Quick Definition & Example</div>
+    <div class="explain">
+      <span class="bullet"><strong>NFA:</strong> Nondeterministic Finite Automaton — a state may have multiple possible next states for the same input, and may include ε-transitions.</span>
+      <span class="bullet"><strong>Key idea:</strong> NFA explores many possible paths in parallel; if any path accepts, the NFA accepts.</span>
+      <span class="bullet"><strong>Example:</strong> From state A on symbol 0 you might go to both A and B. If any resulting path ends in a final state after consuming the input, the NFA accepts.</span>
+      <span class="bullet"><strong>Short trace (NFA ends-with-0) reading "10":</strong> start {A} → read 1 → {A} → read 0 → {A,B} → B is final → <strong style="color:var(--green)">ACCEPT</strong>.</span>
     </div>
   </div>
 
@@ -547,7 +568,7 @@ const DFA_PRESETS = [
   },
   {
     id:'even_a', label:'Even number of a\'s', alphabet:['a','b'],
-    desc:'Accepts strings over {a,b} with an <strong>even number of a\'s</strong> (0 counts as even). Examples: ε, b, bb, aa, bab ✅ | a, aba, aab ❌',
+    desc:'Accepts strings over {a,b} with an <strong>even number of a\'s</strong> (0 counts as even). Examples: ε, b, bb, aa, aba, aab, bab ✅ | a, ba, abb ❌',
     states:['q0','q1'], start:'q0', finals:['q0'],
     delta:{ q0:{a:'q1',b:'q0'}, q1:{a:'q0',b:'q1'} },
     layout:{ q0:[130,110], q1:[420,110] },
@@ -916,7 +937,7 @@ function runConvert() {
       </div>
     </div>`;
   });
-  stepsHTML += stepsHTML + stepRows.join('');
+  stepsHTML += stepRows.join('');
 
   // Build DFA table HTML
   let tableHTML = `<table class="ttable"><thead><tr><th>State</th>${alpha.map(s=>`<th>${s}</th>`).join('')}</tr></thead><tbody>`;
@@ -938,6 +959,7 @@ function runConvert() {
   explainHTML += `<span class="bullet">Each DFA state represents a <strong>set of NFA states</strong> that can be active simultaneously.</span>`;
   explainHTML += `<span class="bullet">DFA final states: <strong>${dfaFinals.map(k=>stateNames[k]).join(', ')}</strong> — these contain at least one NFA final state.</span>`;
   explainHTML += `<span class="bullet">The DFA and NFA accept <strong>exactly the same strings</strong> — they are equivalent.</span>`;
+  explainHTML += `<span class="bullet"><strong>ε-closure note:</strong> If the original NFA contains ε-transitions, compute the ε-closure of each set (all states reachable by ε alone) before or after taking symbol transitions — include closures when building the DFA states.</span>`;
 
   // Draw converted DFA
   drawConvertedDFA('convSvg', dfaTable, stateNames, JSON.stringify([nfa.start]), dfaFinals, alpha);
