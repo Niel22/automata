@@ -414,6 +414,16 @@ header p {
       <span class="bullet"><strong>How transitions "work" (conceptual):</strong> Each arrow is a rule: "If you are in state S and you read symbol x, go to state T." The machine keeps exactly one current state and updates it after reading each symbol.</span>
     </div>
   </div>
+  
+  <div class="card">
+    <div class="card-title">Choose a DFA</div>
+    <div class="preset-list" id="dfaPresets"></div>
+    <div class="info-box" id="dfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="dfaInput" placeholder="Enter string e.g. bba" onkeydown="if(event.key==='Enter')runDFA()"/>
+      <button class="run-btn" onclick="runDFA()">Trace ▶</button>
+    </div>
+  </div>
 
   <div class="card">
     <div class="card-title">State Diagram</div>
@@ -428,15 +438,6 @@ header p {
     <div id="dfaTable"></div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Choose a DFA</div>
-    <div class="preset-list" id="dfaPresets"></div>
-    <div class="info-box" id="dfaDesc"></div>
-    <div class="input-row">
-      <input type="text" id="dfaInput" placeholder="Enter string e.g. bba" onkeydown="if(event.key==='Enter')runDFA()"/>
-      <button class="run-btn" onclick="runDFA()">Trace ▶</button>
-    </div>
-  </div>
   
   <div class="card hidden" id="dfaResultCard">
     <div class="card-title">Trace Result</div>
@@ -469,6 +470,16 @@ header p {
       <span class="bullet"><strong>ε-transitions and closures:</strong> If the NFA has ε-moves, you must also include every state reachable by ε before or after symbol transitions (the ε-closure). That set-of-states bookkeeping is what subset construction uses to build a DFA.</span>
     </div>
   </div>
+  
+  <div class="card">
+    <div class="card-title">Choose an NFA</div>
+    <div class="preset-list" id="nfaPresets"></div>
+    <div class="info-box" id="nfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
+      <button class="run-btn" onclick="runNFA()">Trace ▶</button>
+    </div>
+  </div>
 
   <div class="card">
     <div class="card-title">State Diagram</div>
@@ -481,16 +492,7 @@ header p {
     <div class="card-title">Transition Table</div>
     <div id="nfaTable"></div>
   </div>
-  
-  <div class="card">
-    <div class="card-title">Choose an NFA</div>
-    <div class="preset-list" id="nfaPresets"></div>
-    <div class="info-box" id="nfaDesc"></div>
-    <div class="input-row">
-      <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
-      <button class="run-btn" onclick="runNFA()">Trace ▶</button>
-    </div>
-  </div>
+
   
   <div class="card hidden" id="nfaResultCard">
     <div class="card-title">NFA Trace — All Active States</div>
