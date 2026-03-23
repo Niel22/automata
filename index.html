@@ -395,15 +395,6 @@ header p {
 <!-- ===== DFA TAB ===== -->
 <div class="panel show" id="tab-dfa">
 
-  <div class="card">
-    <div class="card-title">Choose a DFA</div>
-    <div class="preset-list" id="dfaPresets"></div>
-    <div class="info-box" id="dfaDesc"></div>
-    <div class="input-row">
-      <input type="text" id="dfaInput" placeholder="Enter string e.g. bba" onkeydown="if(event.key==='Enter')runDFA()"/>
-      <button class="run-btn" onclick="runDFA()">Trace ▶</button>
-    </div>
-  </div>
  
 
   <div class="card">
@@ -436,6 +427,16 @@ header p {
     <div class="card-title">Transition Table</div>
     <div id="dfaTable"></div>
   </div>
+
+  <div class="card">
+    <div class="card-title">Choose a DFA</div>
+    <div class="preset-list" id="dfaPresets"></div>
+    <div class="info-box" id="dfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="dfaInput" placeholder="Enter string e.g. bba" onkeydown="if(event.key==='Enter')runDFA()"/>
+      <button class="run-btn" onclick="runDFA()">Trace ▶</button>
+    </div>
+  </div>
   
   <div class="card hidden" id="dfaResultCard">
     <div class="card-title">Trace Result</div>
@@ -452,15 +453,6 @@ header p {
 <!-- ===== NFA TAB ===== -->
 <div class="panel" id="tab-nfa">
 
-  <div class="card">
-    <div class="card-title">Choose an NFA</div>
-    <div class="preset-list" id="nfaPresets"></div>
-    <div class="info-box" id="nfaDesc"></div>
-    <div class="input-row">
-      <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
-      <button class="run-btn" onclick="runNFA()">Trace ▶</button>
-    </div>
-  </div>
 
   <div class="card">
     <div class="card-title">NFA — Quick Definition & Example</div>
@@ -488,6 +480,16 @@ header p {
   <div class="card">
     <div class="card-title">Transition Table</div>
     <div id="nfaTable"></div>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">Choose an NFA</div>
+    <div class="preset-list" id="nfaPresets"></div>
+    <div class="info-box" id="nfaDesc"></div>
+    <div class="input-row">
+      <input type="text" id="nfaInput" placeholder="Enter string e.g. 010" onkeydown="if(event.key==='Enter')runNFA()"/>
+      <button class="run-btn" onclick="runNFA()">Trace ▶</button>
+    </div>
   </div>
   
   <div class="card hidden" id="nfaResultCard">
